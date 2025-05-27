@@ -118,6 +118,18 @@ public class StudentService {
                 student.getEnrollmentStatus(),
                 student.getYear(),
                 student.getGender(),
+                student.getProfilePictureUrl(),
+                student.getStudentVideoUrl(),
+                student.getImage1Url(),
+                student.getImage2Url(),
+                student.getImage3Url(),
+                student.getImage4Url(),
+                student.getImage5Url(),
+                student.getImage6Url(),
+                student.getImage7Url(),
+                student.getImage8Url(),
+                student.getImage9Url(),
+                student.getImage10Url(),
                 student.getSchoolAdmin() != null ? student.getSchoolAdmin().getId() : null
         );
     }

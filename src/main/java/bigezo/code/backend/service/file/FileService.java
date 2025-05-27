@@ -43,10 +43,11 @@ public class FileService {
         }
         
         // Create unique file name with timestamp
-        String fileName = String.format("%s_%s_%s.jpg", 
+        String fileName = String.format("%s_%s_%s.%s", 
             fileType, 
             schoolId, 
-            System.currentTimeMillis());
+            System.currentTimeMillis(),
+            file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf('.') + 1));
         
         // Create full path with school ID and file type
         String filePath = String.format("school-%s/students/%s/%s", schoolId, fileType, fileName);

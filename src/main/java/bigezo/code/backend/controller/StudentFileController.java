@@ -46,6 +46,29 @@ public class StudentFileController {
     }
 
     /**
+     * Update profile picture for student
+     */
+    @PutMapping("/{studentId}/profile-picture")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    public ResponseEntity<String> updateProfilePicture(
+            @RequestParam(name = "schoolAdminId") Long schoolAdminId,
+            @PathVariable Long studentId,
+            @RequestParam("file") MultipartFile file) throws Exception {
+        Student student = studentService.findByIdAndSchoolAdminId(studentId, schoolAdminId)
+                .orElseThrow(() -> new IllegalArgumentException("Student not found with ID: " + studentId));
+
+        // Delete existing profile picture if it exists
+        studentFileService.deleteProfilePicture(student);
+
+        // Upload new profile picture
+        String url = studentFileService.uploadProfilePicture(file, student);
+        student.setProfilePictureUrl(url);
+        studentService.save(student);
+
+        return ResponseEntity.ok().body("Profile picture updated successfully!");
+    }
+
+    /**
      * Upload student video
      */
     @PostMapping("/{studentId}/video")
@@ -66,6 +89,29 @@ public class StudentFileController {
         studentService.save(student);
 
         return ResponseEntity.ok().body("Student video uploaded successfully!");
+    }
+
+    /**
+     * Update student video
+     */
+    @PutMapping("/{studentId}/video")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    public ResponseEntity<String> updateStudentVideo(
+            @RequestParam(name = "schoolAdminId") Long schoolAdminId,
+            @PathVariable Long studentId,
+            @RequestParam("file") MultipartFile file) throws Exception {
+        Student student = studentService.findByIdAndSchoolAdminId(studentId, schoolAdminId)
+                .orElseThrow(() -> new IllegalArgumentException("Student not found with ID: " + studentId));
+
+        // Delete existing video if it exists
+        studentFileService.deleteStudentVideo(student);
+
+        // Upload new video
+        String url = studentFileService.uploadStudentVideo(file, student);
+        student.setStudentVideoUrl(url);
+        studentService.save(student);
+
+        return ResponseEntity.ok().body("Student video updated successfully!");
     }
 
     /**
@@ -94,6 +140,34 @@ public class StudentFileController {
         studentService.save(student);
 
         return ResponseEntity.ok().body("Image uploaded successfully!");
+    }
+
+    /**
+     * Update additional image
+     */
+    @PutMapping("/{studentId}/image/{imageNumber}")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    public ResponseEntity<String> updateImage(
+            @RequestParam(name = "schoolAdminId") Long schoolAdminId,
+            @PathVariable Long studentId,
+            @PathVariable int imageNumber,
+            @RequestParam("file") MultipartFile file) throws Exception {
+        if (imageNumber < 1 || imageNumber > 10) {
+            return ResponseEntity.badRequest().body("Image number must be between 1 and 10");
+        }
+
+        Student student = studentService.findByIdAndSchoolAdminId(studentId, schoolAdminId)
+                .orElseThrow(() -> new IllegalArgumentException("Student not found with ID: " + studentId));
+
+        // Delete existing image if it exists
+        studentFileService.deleteImage(student, imageNumber);
+
+        // Upload new image
+        String url = studentFileService.uploadImage(file, student, imageNumber);
+        setStudentImageUrl(student, url, imageNumber);
+        studentService.save(student);
+
+        return ResponseEntity.ok().body("Image updated successfully!");
     }
 
     /**

@@ -1,3 +1,4 @@
+/* <<<<<<<<<<<<<<  ✨ Windsurf Command 🌟 >>>>>>>>>>>>>>>> */
 package bigezo.code.backend.controller;
 
 import bigezo.code.backend.model.Student;
@@ -5,6 +6,7 @@ import bigezo.code.backend.service.StudentService;
 import bigezo.code.backend.service.file.StudentFileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -45,6 +47,29 @@ public class StudentFileController {
     }
 
     /**
+     * Update profile picture for student
+     */
+    @PutMapping("/{studentId}/profile-picture")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    public ResponseEntity<String> updateProfilePicture(
+            @RequestParam(name = "schoolAdminId") Long schoolAdminId,
+            @PathVariable Long studentId,
+            @RequestParam("file") MultipartFile file) throws Exception {
+        Student student = studentService.findByIdAndSchoolAdminId(studentId, schoolAdminId)
+                .orElseThrow(() -> new IllegalArgumentException("Student not found with ID: " + studentId));
+
+        // Delete existing profile picture if it exists
+        studentFileService.deleteProfilePicture(student);
+
+        // Upload new profile picture
+        String url = studentFileService.uploadProfilePicture(file, student);
+        student.setProfilePictureUrl(url);
+        studentService.save(student);
+
+        return ResponseEntity.ok().body("Profile picture updated successfully!");
+    }
+
+    /**
      * Upload student video
      */
     @PostMapping("/{studentId}/video")
@@ -65,6 +90,29 @@ public class StudentFileController {
         studentService.save(student);
 
         return ResponseEntity.ok().body("Student video uploaded successfully!");
+    }
+
+    /**
+     * Update student video
+     */
+    @PutMapping("/{studentId}/video")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    public ResponseEntity<String> updateStudentVideo(
+            @RequestParam(name = "schoolAdminId") Long schoolAdminId,
+            @PathVariable Long studentId,
+            @RequestParam("file") MultipartFile file) throws Exception {
+        Student student = studentService.findByIdAndSchoolAdminId(studentId, schoolAdminId)
+                .orElseThrow(() -> new IllegalArgumentException("Student not found with ID: " + studentId));
+
+        // Delete existing video if it exists
+        studentFileService.deleteStudentVideo(student);
+
+        // Upload new video
+        String url = studentFileService.uploadStudentVideo(file, student);
+        student.setStudentVideoUrl(url);
+        studentService.save(student);
+
+        return ResponseEntity.ok().body("Student video updated successfully!");
     }
 
     /**
@@ -180,3 +228,5 @@ public class StudentFileController {
         }
     }
 }
+
+/* <<<<<<<<<<  136fbc21-11c9-49d8-8d1e-2ea1a41ca935  >>>>>>>>>>> */
